@@ -1,0 +1,166 @@
+---
+/**
+ * Image gallery with lightbox for product detail pages.
+ */
+interface Props {
+  images: string[];
+  alt: string;
+}
+
+const { images, alt } = Astro.props;
+---
+
+{images.length > 0 && (
+  <div class="image-gallery">
+    <!-- Main image -->
+    <div
+      id="gallery-main"
+      class="relative aspect-[4/3] rounded-xl overflow-hidden cursor-zoom-in mb-3"
+      style="background-color: var(--color-surface-alt);"
+    >
+      <img
+        id="gallery-main-img"
+        src={images[0]}
+        alt={alt}
+        class="w-full h-full object-cover transition-opacity duration-300"
+        loading="eager"
+      />
+    </div>
+
+    <!-- Thumbnails -->
+    {images.length > 1 && (
+      <div class="flex gap-2 overflow-x-auto pb-2">
+        {images.map((img, i) => (
+          <button
+            class={`gallery-thumb flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all duration-200 ${i === 0 ? 'ring-2' : 'opacity-60 hover:opacity-100'}`}
+            style={`${i === 0 ? 'ring-color: var(--color-accent);' : ''} background-color: var(--color-surface-alt);`}
+            data-src={img}
+            data-index={i}
+            aria-label={`View image ${i + 1}`}
+            type="button"
+          >
+            <img src={img} alt={`${alt} ${i + 1}`} class="w-full h-full object-cover" loading="lazy" />
+          </button>
+        ))}
+      </div>
+    )}
+
+    <!-- Lightbox -->
+    <div
+      id="lightbox"
+      class="fixed inset-0 z-50 hidden items-center justify-center p-4"
+      style="background-color: rgba(0, 0, 0, 0.9);"
+      role="dialog"
+      aria-label="Image lightbox"
+    >
+      <button
+        id="lightbox-close"
+        class="absolute top-6 right-6 p-2 text-white/70 hover:text-white transition-colors"
+        aria-label="Close lightbox"
+        type="button"
+      >
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <button
+        id="lightbox-prev"
+        class="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors"
+        aria-label="Previous image"
+        type="button"
+      >
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[85vh] object-contain rounded-lg" />
+
+      <button
+        id="lightbox-next"
+        class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors"
+        aria-label="Next image"
+        type="button"
+      >
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+)}
+
+<script>
+  const mainImg = document.getElementById('gallery-main-img') as HTMLImageElement;
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement;
+  const thumbs = document.querySelectorAll('.gallery-thumb');
+
+  let currentIndex = 0;
+  const images: string[] = [];
+  thumbs.forEach((t) => images.push((t as HTMLElement).dataset.src || ''));
+
+  // Thumbnail click
+  thumbs.forEach((thumb) => {
+    thumb.addEventListener('click', () => {
+      const src = (thumb as HTMLElement).dataset.src || '';
+      const idx = Number((thumb as HTMLElement).dataset.index);
+      if (mainImg) mainImg.src = src;
+      currentIndex = idx;
+      thumbs.forEach((t, i) => {
+        t.classList.toggle('ring-2', i === idx);
+        t.classList.toggle('opacity-60', i !== idx);
+      });
+    });
+  });
+
+  // Open lightbox
+  document.getElementById('gallery-main')?.addEventListener('click', () => {
+    if (lightbox && lightboxImg) {
+      lightboxImg.src = images[currentIndex] || '';
+      lightbox.classList.remove('hidden');
+      lightbox.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+  });
+
+  // Close lightbox
+  function closeLightbox() {
+    lightbox?.classList.add('hidden');
+    lightbox?.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('lightbox-close')?.addEventListener('click', closeLightbox);
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  // Navigate lightbox
+  document.getElementById('lightbox-prev')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    if (lightboxImg) lightboxImg.src = images[currentIndex];
+  });
+
+  document.getElementById('lightbox-next')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentIndex = (currentIndex + 1) % images.length;
+    if (lightboxImg) lightboxImg.src = images[currentIndex];
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (lightbox?.classList.contains('hidden')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') {
+      currentIndex = (currentIndex - 1 + images.length) % images.length;
+      if (lightboxImg) lightboxImg.src = images[currentIndex];
+    }
+    if (e.key === 'ArrowRight') {
+      currentIndex = (currentIndex + 1) % images.length;
+      if (lightboxImg) lightboxImg.src = images[currentIndex];
+    }
+  });
+</script>

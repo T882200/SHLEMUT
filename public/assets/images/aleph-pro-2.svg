@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#1C1917"/>
+  <text x="400" y="200" font-family="Georgia, serif" font-size="48" fill="#FAFAF9" text-anchor="middle">ABCDEFGHIJKLM</text>
+  <text x="400" y="270" font-family="Georgia, serif" font-size="48" fill="#FAFAF9" text-anchor="middle">NOPQRSTUVWXYZ</text>
+  <text x="400" y="350" font-family="Georgia, serif" font-size="48" fill="#FAFAF9" text-anchor="middle">abcdefghijklm</text>
+  <text x="400" y="420" font-family="Georgia, serif" font-size="48" fill="#FAFAF9" text-anchor="middle">nopqrstuvwxyz</text>
+  <text x="400" y="500" font-family="Georgia, serif" font-size="48" fill="#D97706" text-anchor="middle">0123456789</text>
+</svg>

@@ -1,0 +1,310 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ImageGallery from '@/components/ImageGallery.astro';
+import TypeTester from '@/components/TypeTester.astro';
+import ProductCard from '@/components/ProductCard.astro';
+import { getCollection, render } from 'astro:content';
+import { formatPrice } from '@/lib/utils';
+
+export async function getStaticPaths() {
+  const products = await getCollection('products', ({ data }) => data.status === 'published');
+  return products.map((product) => ({
+    params: { slug: product.data.slug },
+    props: { product },
+  }));
+}
+
+const { product } = Astro.props;
+const { data } = product;
+const { Content } = await render(product);
+
+// Related products (same type, excluding current)
+const allProducts = await getCollection('products', ({ data: d }) => d.status === 'published');
+const relatedProducts = allProducts.filter((p) => p.data.slug !== data.slug && p.data.type === data.type).slice(0, 3);
+
+const formattedPrice = formatPrice(data.price, data.currency);
+
+// JSON-LD structured data
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: data.title,
+  description: data.description,
+  image: data.preview_images[0] || data.thumbnail,
+  offers: {
+    '@type': 'Offer',
+    price: data.price,
+    priceCurrency: data.currency,
+    availability: 'https://schema.org/InStock',
+  },
+  category: data.category,
+};
+---
+
+<BaseLayout title={data.title} description={data.description}>
+  <!-- Structured data -->
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <article class="py-12 md:py-20">
+    <div class="container-wide">
+      <!-- Breadcrumb -->
+      <nav class="mb-8 fade-in-up" aria-label="Breadcrumb">
+        <ol class="flex items-center gap-2 text-sm" style="color: var(--color-text-muted);">
+          <li><a href="/SHLEMUT/" class="no-underline hover:opacity-70 transition-opacity">Home</a></li>
+          <li>/</li>
+          <li><a href="/SHLEMUT/shop/" class="no-underline hover:opacity-70 transition-opacity">Shop</a></li>
+          <li>/</li>
+          <li style="color: var(--color-text);">{data.title}</li>
+        </ol>
+      </nav>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        <!-- Left: Images -->
+        <div class="fade-in-up">
+          <ImageGallery images={data.preview_images.length > 0 ? data.preview_images : [data.thumbnail]} alt={data.title} />
+        </div>
+
+        <!-- Right: Product info -->
+        <div class="fade-in-up">
+          <!-- Category & type -->
+          <div class="flex items-center gap-3 mb-4">
+            <span class="badge">{data.category}</span>
+            <span
+              class="badge text-white"
+              style={`background-color: ${data.type === 'font' ? 'var(--color-accent)' : '#6366F1'};`}
+            >
+              {data.type}
+            </span>
+          </div>
+
+          <!-- Title -->
+          <h1 class="text-3xl md:text-4xl font-bold leading-tight" style="color: var(--color-text);">
+            {data.title}
+          </h1>
+
+          <!-- Description -->
+          <p class="mt-4 text-base leading-relaxed" style="color: var(--color-text-muted);">
+            {data.description}
+          </p>
+
+          <!-- Tags -->
+          {data.tags.length > 0 && (
+            <div class="flex flex-wrap gap-2 mt-4">
+              {data.tags.map((tag) => (
+                <span class="text-xs px-2.5 py-1 rounded-full" style="background-color: var(--color-surface-alt); color: var(--color-text-muted);">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <!-- Price & CTA -->
+          <div class="mt-8 p-6 rounded-xl" style="background-color: var(--color-surface-alt); border: 1px solid var(--color-border);">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-3xl font-bold" style="color: var(--color-text);">{formattedPrice}</span>
+              {data.license_type === 'serial' && (
+                <span class="text-xs px-2.5 py-1 rounded-full" style="background-color: var(--color-accent-light); color: var(--color-accent);">
+                  Serial key included
+                </span>
+              )}
+            </div>
+            <button
+              id="product-add-to-cart"
+              class="btn btn-accent w-full text-base py-4"
+              data-slug={data.slug}
+              data-title={data.title}
+              data-price={data.price}
+              data-currency={data.currency}
+              data-thumbnail={data.thumbnail}
+              data-type={data.type}
+              type="button"
+            >
+              Add to Cart
+            </button>
+            <p class="text-xs text-center mt-3" style="color: var(--color-text-muted);">
+              Secure checkout • Instant delivery
+            </p>
+          </div>
+
+          <!-- License info -->
+          <div class="mt-6 space-y-3">
+            <h3 class="text-sm font-semibold" style="color: var(--color-text);">License</h3>
+            <ul class="space-y-2 text-sm" style="color: var(--color-text-muted);">
+              {data.type === 'font' ? (
+                <>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 flex-shrink-0" style="color: var(--color-accent);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    Up to 5 devices
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 flex-shrink-0" style="color: var(--color-accent);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    Unlimited commercial projects
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 flex-shrink-0" style="color: var(--color-accent);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    Web font usage included
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 flex-shrink-0" style="color: var(--color-accent);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    Up to 3 devices
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 flex-shrink-0" style="color: var(--color-accent);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    Serial key activation
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 flex-shrink-0" style="color: var(--color-accent);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    Free updates included
+                  </li>
+                </>
+              )}
+            </ul>
+            <a href="/SHLEMUT/license/" class="text-xs font-medium no-underline" style="color: var(--color-accent);">
+              View full license terms →
+            </a>
+          </div>
+
+          <!-- Compatibility (scripts) -->
+          {data.compatibility && (
+            <div class="mt-6 p-4 rounded-lg" style="background-color: var(--color-surface-alt);">
+              <p class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--color-text-muted);">Compatibility</p>
+              <p class="text-sm" style="color: var(--color-text);">{data.compatibility}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Type Tester (fonts only) -->
+      {data.type === 'font' && data.font_weights && (
+        <div class="mt-16 fade-in-up">
+          <TypeTester fontFamily="Inter" weights={data.font_weights} />
+        </div>
+      )}
+
+      <!-- Full description -->
+      <div class="mt-16 max-w-3xl fade-in-up">
+        <div class="prose prose-stone max-w-none" style="color: var(--color-text);">
+          <Content />
+        </div>
+      </div>
+
+      <!-- Related products -->
+      {relatedProducts.length > 0 && (
+        <div class="mt-20 fade-in-up">
+          <h2 class="text-2xl font-bold mb-8" style="color: var(--color-text);">Related Products</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {relatedProducts.map((rp) => (
+              <ProductCard
+                slug={rp.data.slug}
+                title={rp.data.title}
+                type={rp.data.type}
+                price={rp.data.price}
+                currency={rp.data.currency}
+                thumbnail={rp.data.thumbnail}
+                category={rp.data.category}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </article>
+
+  <!-- Sticky mobile CTA -->
+  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-20 p-4" style="background-color: var(--color-surface); border-top: 1px solid var(--color-border);">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <p class="text-sm font-semibold" style="color: var(--color-text);">{data.title}</p>
+        <p class="text-lg font-bold" style="color: var(--color-text);">{formattedPrice}</p>
+      </div>
+      <button
+        class="mobile-add-to-cart btn btn-accent px-6 py-3"
+        data-slug={data.slug}
+        data-title={data.title}
+        data-price={data.price}
+        data-currency={data.currency}
+        data-thumbnail={data.thumbnail}
+        data-type={data.type}
+        type="button"
+      >
+        Add to Cart
+      </button>
+    </div>
+  </div>
+  <div class="lg:hidden h-20"></div>
+</BaseLayout>
+
+<style>
+  .prose h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  .prose h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .prose p {
+    margin-bottom: 1rem;
+    line-height: 1.7;
+  }
+  .prose ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .prose li {
+    margin-bottom: 0.25rem;
+    line-height: 1.6;
+  }
+  .prose strong {
+    font-weight: 600;
+  }
+</style>
+
+<script>
+  function handleAddToCart(btn: Element) {
+    const el = btn as HTMLElement;
+    const item = {
+      slug: el.dataset.slug!,
+      title: el.dataset.title!,
+      price: Number(el.dataset.price),
+      currency: el.dataset.currency!,
+      thumbnail: el.dataset.thumbnail!,
+      type: el.dataset.type as 'font' | 'script',
+    };
+
+    let cart: Array<{slug: string}> = [];
+    try {
+      cart = JSON.parse(localStorage.getItem('shlemut-cart') || '[]');
+    } catch { /* empty */ }
+
+    if (cart.some((i) => i.slug === item.slug)) {
+      window.dispatchEvent(new CustomEvent('show-toast', {
+        detail: { message: 'Already in your cart', type: 'info' },
+      }));
+      return;
+    }
+
+    cart.push({ ...item, quantity: 1 });
+    localStorage.setItem('shlemut-cart', JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent('cart-updated', { detail: { items: cart } }));
+    window.dispatchEvent(new CustomEvent('show-toast', {
+      detail: { message: `${item.title} added to cart`, type: 'success' },
+    }));
+  }
+
+  document.getElementById('product-add-to-cart')?.addEventListener('click', function () {
+    handleAddToCart(this);
+  });
+
+  document.querySelector('.mobile-add-to-cart')?.addEventListener('click', function () {
+    handleAddToCart(this);
+  });
+</script>

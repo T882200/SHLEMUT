@@ -1,0 +1,247 @@
+backend:
+  name: github
+  repo: your-username/SHLEMUT  # Update with actual repo
+  branch: main
+  base_url: https://your-auth-provider.com  # Update with OAuth provider
+
+media_folder: public/assets/images
+public_folder: /SHLEMUT/assets/images
+
+site_url: https://your-username.github.io/SHLEMUT
+
+collections:
+  # ============================================
+  # Products
+  # ============================================
+  - name: products
+    label: Products
+    folder: src/content/products
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    fields:
+      - label: Title
+        name: title
+        widget: string
+
+      - label: Slug
+        name: slug
+        widget: string
+        pattern: ['^[a-z0-9-]+$', 'Lowercase letters, numbers, and hyphens only']
+
+      - label: Type
+        name: type
+        widget: select
+        options:
+          - { label: "Font", value: "font" }
+          - { label: "Script", value: "script" }
+
+      - label: Category
+        name: category
+        widget: select
+        options:
+          - "Hebrew Fonts"
+          - "Display Fonts"
+          - "Sans-Serif Fonts"
+          - "Serif Fonts"
+          - "InDesign Scripts"
+          - "Automation Tools"
+
+      - label: Price
+        name: price
+        widget: number
+        value_type: float
+        min: 0
+
+      - label: Currency
+        name: currency
+        widget: select
+        default: USD
+        options: ["USD", "EUR", "ILS"]
+
+      - label: Short Description
+        name: description
+        widget: text
+
+      - label: Thumbnail
+        name: thumbnail
+        widget: image
+
+      - label: Preview Images
+        name: preview_images
+        widget: list
+        field:
+          label: Image
+          name: image
+          widget: image
+
+      - label: Download File URL
+        name: file_url
+        widget: string
+        required: false
+        hint: "Private URL for the downloadable file"
+
+      - label: License Type
+        name: license_type
+        widget: select
+        default: standard
+        options:
+          - { label: "Standard (fonts)", value: "standard" }
+          - { label: "Serial Key (scripts)", value: "serial" }
+
+      - label: Serial Key Configuration
+        name: serial_key_config
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { label: "Prefix", name: "prefix", widget: "string", default: "KEY" }
+          - { label: "Total Length", name: "length", widget: "number", default: 16, value_type: "int" }
+          - { label: "Number of Segments", name: "segments", widget: "number", default: 4, value_type: "int" }
+          - { label: "Character Set", name: "charset", widget: "string", default: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789" }
+
+      - label: Featured
+        name: featured
+        widget: boolean
+        default: false
+
+      - label: Status
+        name: status
+        widget: select
+        default: published
+        options:
+          - { label: "Published", value: "published" }
+          - { label: "Draft", value: "draft" }
+
+      - label: Publication Date
+        name: date
+        widget: datetime
+
+      - label: Tags
+        name: tags
+        widget: list
+        field:
+          label: Tag
+          name: tag
+          widget: string
+
+      - label: Compatibility
+        name: compatibility
+        widget: string
+        required: false
+        hint: "e.g., Adobe InDesign CC 2020+"
+
+      - label: Video Demo URL
+        name: video_url
+        widget: string
+        required: false
+
+      - label: Font Weights
+        name: font_weights
+        widget: list
+        required: false
+        field:
+          label: Weight
+          name: weight
+          widget: string
+
+      - label: Body
+        name: body
+        widget: markdown
+
+  # ============================================
+  # Pages
+  # ============================================
+  - name: pages
+    label: Pages
+    folder: src/content/pages
+    create: false
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    fields:
+      - label: Title
+        name: title
+        widget: string
+
+      - label: Description
+        name: description
+        widget: text
+        required: false
+
+      - label: Body
+        name: body
+        widget: markdown
+
+  # ============================================
+  # Site Settings
+  # ============================================
+  - name: settings
+    label: Settings
+    files:
+      - label: Site Settings
+        name: site
+        file: src/content/settings/site.json
+        fields:
+          - label: Site Name
+            name: site_name
+            widget: string
+            default: "SHLEMUT"
+
+          - label: Site Description
+            name: site_description
+            widget: text
+
+          - label: Accent Color
+            name: accent_color
+            widget: color
+            default: "#D97706"
+
+          - label: Social Links
+            name: social
+            widget: object
+            fields:
+              - { label: "Twitter", name: "twitter", widget: "string", required: false }
+              - { label: "Instagram", name: "instagram", widget: "string", required: false }
+              - { label: "GitHub", name: "github", widget: "string", required: false }
+
+          - label: Footer Text
+            name: footer_text
+            widget: text
+            required: false
+
+      - label: Homepage
+        name: homepage
+        file: src/content/settings/homepage.json
+        fields:
+          - label: Hero Title Line 1
+            name: hero_line_1
+            widget: string
+            default: "Fonts &"
+
+          - label: Hero Rotating Words
+            name: hero_words
+            widget: list
+            default: ["Scripts", "Tools", "Assets"]
+            field:
+              label: Word
+              name: word
+              widget: string
+
+          - label: Hero Line 3
+            name: hero_line_3
+            widget: string
+            default: "for Designers"
+
+          - label: Hero Subtitle
+            name: hero_subtitle
+            widget: text
+
+          - label: Featured Product Slugs
+            name: featured_slugs
+            widget: list
+            field:
+              label: Product Slug
+              name: slug
+              widget: string

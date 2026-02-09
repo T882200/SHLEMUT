@@ -1,0 +1,78 @@
+---
+/**
+ * Live type tester for font product pages.
+ * Users can type custom text, adjust size and weight.
+ */
+interface Props {
+  fontFamily?: string;
+  weights?: string[];
+}
+
+const { fontFamily = 'Inter', weights = ['300', '400', '500', '600', '700'] } = Astro.props;
+---
+
+<div class="type-tester rounded-xl p-6 md:p-8" style="background-color: var(--color-surface-alt); border: 1px solid var(--color-border);">
+  <div class="flex flex-wrap items-center gap-4 mb-6">
+    <label class="text-xs font-semibold uppercase tracking-wider" style="color: var(--color-text-muted);">
+      Type Tester
+    </label>
+
+    <!-- Size slider -->
+    <div class="flex items-center gap-2 ml-auto">
+      <label for="type-size" class="text-xs" style="color: var(--color-text-muted);">Size</label>
+      <input
+        id="type-size"
+        type="range"
+        min="16"
+        max="120"
+        value="48"
+        class="w-24 accent-[var(--color-accent)]"
+      />
+      <span id="type-size-value" class="text-xs tabular-nums w-10 text-right" style="color: var(--color-text-muted);">48px</span>
+    </div>
+
+    <!-- Weight select -->
+    <div class="flex items-center gap-2">
+      <label for="type-weight" class="text-xs" style="color: var(--color-text-muted);">Weight</label>
+      <select
+        id="type-weight"
+        class="text-xs px-2 py-1 rounded-md appearance-none cursor-pointer"
+        style="background-color: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text);"
+      >
+        {weights.map((w) => (
+          <option value={w} selected={w === '400'}>
+            {w}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+
+  <!-- Editable text area -->
+  <div
+    id="type-preview"
+    contenteditable="true"
+    role="textbox"
+    aria-label="Type tester preview"
+    class="outline-none min-h-[4rem] leading-tight break-words"
+    style={`font-family: '${fontFamily}', sans-serif; font-size: 48px; font-weight: 400; color: var(--color-text);`}
+  >
+    The quick brown fox jumps over the lazy dog
+  </div>
+</div>
+
+<script>
+  const sizeSlider = document.getElementById('type-size') as HTMLInputElement;
+  const sizeValue = document.getElementById('type-size-value');
+  const weightSelect = document.getElementById('type-weight') as HTMLSelectElement;
+  const preview = document.getElementById('type-preview');
+
+  sizeSlider?.addEventListener('input', () => {
+    if (preview) preview.style.fontSize = `${sizeSlider.value}px`;
+    if (sizeValue) sizeValue.textContent = `${sizeSlider.value}px`;
+  });
+
+  weightSelect?.addEventListener('change', () => {
+    if (preview) preview.style.fontWeight = weightSelect.value;
+  });
+</script>

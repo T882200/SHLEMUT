@@ -1,0 +1,41 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404 — Page Not Found" noIndex>
+  <section class="py-20 md:py-32">
+    <div class="container-narrow text-center">
+      <!-- Large decorative 404 -->
+      <div class="mb-8 select-none" aria-hidden="true">
+        <span class="text-[10rem] md:text-[14rem] font-bold leading-none tracking-tighter" style="color: var(--color-border); font-family: var(--font-heading);">
+          404
+        </span>
+      </div>
+
+      <h1 class="text-2xl md:text-3xl font-bold mb-4" style="color: var(--color-text);">
+        Page not found
+      </h1>
+      <p class="text-base mb-8 max-w-md mx-auto" style="color: var(--color-text-muted);">
+        The page you're looking for doesn't exist or has been moved.
+        Let's get you back on track.
+      </p>
+
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="/SHLEMUT/" class="btn btn-primary">
+          Back to Home
+        </a>
+        <a href="/SHLEMUT/shop/" class="btn btn-secondary">
+          Browse Shop
+        </a>
+      </div>
+
+      <!-- Fun animated element -->
+      <div class="mt-16 opacity-50" aria-hidden="true">
+        <p class="text-sm" style="color: var(--color-text-muted); font-family: var(--font-mono);">
+          > looking for the missing page...
+          <span id="cursor" class="inline-block w-2 h-4 ml-1 animate-pulse" style="background-color: var(--color-text-muted);"></span>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

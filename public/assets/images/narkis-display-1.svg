@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#F5F5F4"/>
+  <text x="400" y="200" font-family="Georgia, serif" font-size="72" font-weight="700" fill="#1C1917" text-anchor="middle">Headlines</text>
+  <text x="400" y="300" font-family="Georgia, serif" font-size="72" font-weight="700" fill="#1C1917" text-anchor="middle">That Demand</text>
+  <text x="400" y="400" font-family="Georgia, serif" font-size="72" font-weight="700" fill="#D97706" text-anchor="middle">Attention</text>
+  <rect x="150" y="440" width="500" height="2" fill="#E7E5E4"/>
+  <text x="400" y="490" font-family="system-ui, sans-serif" font-size="18" fill="#78716C" text-anchor="middle">Narkis Display — Bold Display Typeface</text>
+</svg>

@@ -1,0 +1,177 @@
+---
+/**
+ * Slide-out cart drawer. Toggled by the cart icon in the header.
+ * All cart logic runs client-side.
+ */
+---
+
+<!-- Overlay -->
+<div
+  id="cart-overlay"
+  class="fixed inset-0 z-30 hidden transition-opacity duration-300 opacity-0"
+  style="background-color: rgba(0, 0, 0, 0.4);"
+  aria-hidden="true"
+></div>
+
+<!-- Drawer -->
+<aside
+  id="cart-drawer"
+  class="fixed top-0 right-0 z-40 h-full w-full max-w-md flex flex-col transition-transform duration-300 translate-x-full"
+  style="background-color: var(--color-surface); border-left: 1px solid var(--color-border);"
+  role="dialog"
+  aria-label="Shopping cart"
+  aria-hidden="true"
+>
+  <!-- Header -->
+  <div class="flex items-center justify-between p-6" style="border-bottom: 1px solid var(--color-border);">
+    <h2 class="text-lg font-semibold" style="color: var(--color-text);">Cart</h2>
+    <button
+      id="cart-close"
+      class="p-2 rounded-lg transition-colors duration-150"
+      style="color: var(--color-text-muted);"
+      aria-label="Close cart"
+      type="button"
+    >
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Cart items -->
+  <div id="cart-items" class="flex-1 overflow-y-auto p-6">
+    <!-- Empty state -->
+    <div id="cart-empty" class="flex flex-col items-center justify-center h-full text-center">
+      <svg class="w-16 h-16 mb-4" style="color: var(--color-border);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      </svg>
+      <p class="text-sm font-medium" style="color: var(--color-text-muted);">Your cart is empty</p>
+      <a href="/SHLEMUT/shop/" class="btn btn-secondary mt-4 text-sm">Browse Products</a>
+    </div>
+    <!-- Items will be rendered here -->
+    <div id="cart-item-list" class="hidden space-y-4"></div>
+  </div>
+
+  <!-- Footer with total and checkout -->
+  <div id="cart-footer" class="hidden p-6" style="border-top: 1px solid var(--color-border);">
+    <div class="flex items-center justify-between mb-4">
+      <span class="text-sm font-medium" style="color: var(--color-text-muted);">Total</span>
+      <span id="cart-total" class="text-xl font-bold" style="color: var(--color-text);">$0</span>
+    </div>
+    <button id="checkout-btn" class="btn btn-accent w-full" type="button">
+      Checkout
+    </button>
+    <p class="text-xs text-center mt-3" style="color: var(--color-text-muted);">
+      You'll be redirected to our secure payment provider.
+    </p>
+  </div>
+</aside>
+
+<script>
+  const overlay = document.getElementById('cart-overlay');
+  const drawer = document.getElementById('cart-drawer');
+  const cartEmpty = document.getElementById('cart-empty');
+  const cartItemList = document.getElementById('cart-item-list');
+  const cartFooter = document.getElementById('cart-footer');
+  const cartTotal = document.getElementById('cart-total');
+
+  function openCart() {
+    overlay?.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      overlay?.classList.remove('opacity-0');
+      overlay?.classList.add('opacity-100');
+    });
+    drawer?.classList.remove('translate-x-full');
+    drawer?.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    renderCart();
+  }
+
+  function closeCart() {
+    overlay?.classList.remove('opacity-100');
+    overlay?.classList.add('opacity-0');
+    drawer?.classList.add('translate-x-full');
+    drawer?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    setTimeout(() => overlay?.classList.add('hidden'), 300);
+  }
+
+  function formatPrice(price: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(price);
+  }
+
+  function renderCart() {
+    let cart: Array<{slug: string; title: string; price: number; thumbnail: string; type: string}> = [];
+    try {
+      cart = JSON.parse(localStorage.getItem('shlemut-cart') || '[]');
+    } catch { /* empty */ }
+
+    if (cart.length === 0) {
+      cartEmpty?.classList.remove('hidden');
+      cartItemList?.classList.add('hidden');
+      cartFooter?.classList.add('hidden');
+      return;
+    }
+
+    cartEmpty?.classList.add('hidden');
+    cartItemList?.classList.remove('hidden');
+    cartFooter?.classList.remove('hidden');
+
+    const total = cart.reduce((sum: number, item: {price: number}) => sum + item.price, 0);
+    if (cartTotal) cartTotal.textContent = formatPrice(total);
+
+    if (cartItemList) {
+      cartItemList.innerHTML = cart
+        .map(
+          (item) => `
+        <div class="flex gap-4 items-start" data-slug="${item.slug}">
+          <div class="w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden" style="background-color: var(--color-surface-alt);">
+            <img src="${item.thumbnail}" alt="${item.title}" class="w-full h-full object-cover" loading="lazy" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-sm font-medium truncate" style="color: var(--color-text);">${item.title}</h4>
+            <span class="badge mt-1">${item.type}</span>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            <span class="text-sm font-semibold" style="color: var(--color-text);">${formatPrice(item.price)}</span>
+            <button class="cart-remove-btn text-xs transition-opacity hover:opacity-70" style="color: var(--color-text-muted);" data-slug="${item.slug}" aria-label="Remove ${item.title}">Remove</button>
+          </div>
+        </div>
+      `,
+        )
+        .join('');
+
+      // Attach remove handlers
+      cartItemList.querySelectorAll('.cart-remove-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const slug = (btn as HTMLElement).dataset.slug;
+          let c: Array<{slug: string}> = [];
+          try { c = JSON.parse(localStorage.getItem('shlemut-cart') || '[]'); } catch { /* empty */ }
+          const updated = c.filter((i: {slug: string}) => i.slug !== slug);
+          localStorage.setItem('shlemut-cart', JSON.stringify(updated));
+          window.dispatchEvent(new CustomEvent('cart-updated', { detail: { items: updated } }));
+          renderCart();
+        });
+      });
+    }
+  }
+
+  // Event listeners
+  window.addEventListener('toggle-cart', openCart);
+  overlay?.addEventListener('click', closeCart);
+  document.getElementById('cart-close')?.addEventListener('click', closeCart);
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !drawer?.classList.contains('translate-x-full')) {
+      closeCart();
+    }
+  });
+
+  // Re-render when cart updates
+  window.addEventListener('cart-updated', renderCart);
+</script>

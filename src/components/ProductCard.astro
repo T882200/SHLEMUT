@@ -1,0 +1,113 @@
+---
+/**
+ * Product card component for grids.
+ * Shows thumbnail, title, type badge, price, and add-to-cart button.
+ */
+interface Props {
+  slug: string;
+  title: string;
+  type: 'font' | 'script';
+  price: number;
+  currency?: string;
+  thumbnail: string;
+  category?: string;
+}
+
+const { slug, title, type, price, currency = 'USD', thumbnail, category } = Astro.props;
+
+const formattedPrice = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency,
+  minimumFractionDigits: 0,
+}).format(price);
+
+const typeBadgeColor = type === 'font' ? 'var(--color-accent)' : '#6366F1';
+---
+
+<article class="card group" data-product-slug={slug}>
+  <a href={`/SHLEMUT/shop/${slug}/`} class="block no-underline">
+    <!-- Thumbnail -->
+    <div class="relative aspect-[4/3] overflow-hidden" style="background-color: var(--color-surface-alt);">
+      <img
+        src={thumbnail}
+        alt={title}
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        loading="lazy"
+        decoding="async"
+      />
+      <!-- Type badge -->
+      <span
+        class="absolute top-3 left-3 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider rounded-full text-white"
+        style={`background-color: ${typeBadgeColor};`}
+      >
+        {type}
+      </span>
+    </div>
+
+    <!-- Info -->
+    <div class="p-5">
+      {category && (
+        <p class="text-xs uppercase tracking-wider mb-1" style="color: var(--color-text-muted);">
+          {category}
+        </p>
+      )}
+      <h3 class="text-base font-semibold leading-tight" style="color: var(--color-text);">
+        {title}
+      </h3>
+      <div class="flex items-center justify-between mt-3">
+        <span class="text-lg font-bold" style="color: var(--color-text);">{formattedPrice}</span>
+        <button
+          class="add-to-cart-btn btn btn-primary text-xs px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          data-slug={slug}
+          data-title={title}
+          data-price={price}
+          data-currency={currency}
+          data-thumbnail={thumbnail}
+          data-type={type}
+          aria-label={`Add ${title} to cart`}
+          type="button"
+        >
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  </a>
+</article>
+
+<script>
+  document.querySelectorAll('.add-to-cart-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const el = btn as HTMLElement;
+      const item = {
+        slug: el.dataset.slug!,
+        title: el.dataset.title!,
+        price: Number(el.dataset.price),
+        currency: el.dataset.currency!,
+        thumbnail: el.dataset.thumbnail!,
+        type: el.dataset.type as 'font' | 'script',
+      };
+
+      // Check if already in cart
+      let cart: Array<{slug: string}> = [];
+      try {
+        cart = JSON.parse(localStorage.getItem('shlemut-cart') || '[]');
+      } catch { /* empty */ }
+
+      if (cart.some((i) => i.slug === item.slug)) {
+        window.dispatchEvent(new CustomEvent('show-toast', {
+          detail: { message: 'Already in your cart', type: 'info' },
+        }));
+        return;
+      }
+
+      cart.push({ ...item, quantity: 1 });
+      localStorage.setItem('shlemut-cart', JSON.stringify(cart));
+      window.dispatchEvent(new CustomEvent('cart-updated', { detail: { items: cart } }));
+      window.dispatchEvent(new CustomEvent('show-toast', {
+        detail: { message: `${item.title} added to cart`, type: 'success' },
+      }));
+    });
+  });
+</script>
