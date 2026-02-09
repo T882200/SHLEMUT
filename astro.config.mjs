@@ -4,7 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  site: 'https://your-username.github.io',
+  site: 'https://T882200.github.io',
   base: '/SHLEMUT',
   output: 'static',
   integrations: [mdx(), sitemap()],

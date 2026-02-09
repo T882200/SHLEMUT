@@ -1,13 +1,12 @@
 backend:
   name: github
-  repo: your-username/SHLEMUT  # Update with actual repo
+  repo: T882200/SHLEMUT
   branch: main
-  base_url: https://your-auth-provider.com  # Update with OAuth provider
 
 media_folder: public/assets/images
 public_folder: /SHLEMUT/assets/images
 
-site_url: https://your-username.github.io/SHLEMUT
+site_url: https://T882200.github.io/SHLEMUT
 
 collections:
   # ============================================
