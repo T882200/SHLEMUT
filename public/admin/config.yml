@@ -3,7 +3,7 @@ backend:
   repo: T882200/SHLEMUT
   branch: claude/digital-assets-store-1b3yK
   auth_type: pkce
-  app_id: ""  # ← Paste your GitHub OAuth App Client ID here
+  app_id: "Ov23li80PRSpD31zrPO6"
 
 media_folder: public/assets/images
 public_folder: /SHLEMUT/assets/images
