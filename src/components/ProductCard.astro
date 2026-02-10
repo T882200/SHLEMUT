@@ -2,6 +2,7 @@
 /**
  * Product card component for grids.
  * Shows thumbnail, title, type badge, price, and add-to-cart button.
+ * Design system: gradient accents (light), amber accents (dark).
  */
 interface Props {
   slug: string;
@@ -21,13 +22,16 @@ const formattedPrice = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 0,
 }).format(price);
 
-const typeBadgeColor = type === 'font' ? 'var(--color-accent)' : '#6366F1';
+const badgeClass = type === 'font' ? 'badge-font' : 'badge-script';
 ---
 
 <article class="card group" data-product-slug={slug}>
   <a href={`/SHLEMUT/shop/${slug}/`} class="block no-underline">
     <!-- Thumbnail -->
-    <div class="relative aspect-[4/3] overflow-hidden" style="background-color: var(--color-surface-alt);">
+    <div
+      class="relative aspect-[4/3] overflow-hidden dark:bg-[var(--color-surface-alt-dark)]"
+      style="background-color: var(--color-surface-alt);"
+    >
       <img
         src={thumbnail}
         alt={title}
@@ -36,10 +40,7 @@ const typeBadgeColor = type === 'font' ? 'var(--color-accent)' : '#6366F1';
         decoding="async"
       />
       <!-- Type badge -->
-      <span
-        class="absolute top-3 left-3 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider rounded-full text-white"
-        style={`background-color: ${typeBadgeColor};`}
-      >
+      <span class={`badge absolute top-3 left-3 ${badgeClass}`}>
         {type}
       </span>
     </div>
@@ -47,17 +48,28 @@ const typeBadgeColor = type === 'font' ? 'var(--color-accent)' : '#6366F1';
     <!-- Info -->
     <div class="p-5">
       {category && (
-        <p class="text-xs uppercase tracking-wider mb-1" style="color: var(--color-text-muted);">
+        <p
+          class="text-xs uppercase tracking-wider mb-1 dark:text-[var(--color-text-muted-dark)]"
+          style="color: var(--color-text-muted);"
+        >
           {category}
         </p>
       )}
-      <h3 class="text-base font-semibold leading-tight" style="color: var(--color-text);">
+      <h3
+        class="text-base font-semibold leading-tight dark:text-[var(--color-text-dark)]"
+        style="color: var(--color-text);"
+      >
         {title}
       </h3>
       <div class="flex items-center justify-between mt-3">
-        <span class="text-lg font-bold" style="color: var(--color-text);">{formattedPrice}</span>
+        <span
+          class="text-lg font-bold dark:text-[var(--color-text-dark)]"
+          style="color: var(--color-text);"
+        >
+          {formattedPrice}
+        </span>
         <button
-          class="add-to-cart-btn btn btn-primary text-xs px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          class="add-to-cart-btn btn btn-gradient text-xs px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           data-slug={slug}
           data-title={title}
           data-price={price}

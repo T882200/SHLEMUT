@@ -33,7 +33,7 @@ const { images, alt } = Astro.props;
         {images.map((img, i) => (
           <button
             class={`gallery-thumb flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all duration-200 ${i === 0 ? 'ring-2' : 'opacity-60 hover:opacity-100'}`}
-            style={`${i === 0 ? 'ring-color: var(--color-accent);' : ''} background-color: var(--color-surface-alt);`}
+            style={`${i === 0 ? 'ring-color: var(--color-purple);' : ''} background-color: var(--color-surface-alt);`}
             data-src={img}
             data-index={i}
             aria-label={`View image ${i + 1}`}

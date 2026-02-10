@@ -1,12 +1,34 @@
 ---
 /**
  * Toast notification container. Listens for 'show-toast' custom events.
+ *
+ * Design system:
+ *   Light — white bg, pink-purple-blue accents, black text
+ *   Dark  — pure black bg, yellow-orange (#F59E0B) accents, white text
+ *
+ * Toast types:
+ *   success — gradient pink-to-purple (light) / amber-to-orange (dark), white text
+ *   error   — red bg, white text (both themes)
+ *   info    — blue bg white text (light) / amber bg dark text (dark)
  */
 ---
 
+<style>
+  .toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    pointer-events: none;
+  }
+</style>
+
 <div
   id="toast-container"
-  class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"
+  class="toast-container"
   aria-live="polite"
 ></div>
 
@@ -19,18 +41,50 @@
 
   const container = document.getElementById('toast-container');
 
+  function isDark(): boolean {
+    return document.documentElement.classList.contains('dark');
+  }
+
+  function getToastStyles(type: string): string {
+    const dark = isDark();
+
+    switch (type) {
+      case 'success':
+        return dark
+          ? 'background: linear-gradient(135deg, #F59E0B, #D97706); color: #ffffff;'
+          : 'background: linear-gradient(135deg, var(--color-pink), var(--color-purple)); color: #ffffff;';
+      case 'error':
+        return 'background-color: #DC2626; color: #ffffff;';
+      case 'info':
+        return dark
+          ? 'background-color: #F59E0B; color: #0A0A0A;'
+          : 'background-color: #3B82F6; color: #ffffff;';
+      default:
+        return dark
+          ? 'background: linear-gradient(135deg, #F59E0B, #D97706); color: #ffffff;'
+          : 'background: linear-gradient(135deg, var(--color-pink), var(--color-purple)); color: #ffffff;';
+    }
+  }
+
   window.addEventListener('show-toast', ((e: CustomEvent<ToastDetail>) => {
     const { message, type = 'success', duration = 3000 } = e.detail;
 
     const toast = document.createElement('div');
-    toast.className = 'pointer-events-auto px-5 py-3 rounded-lg text-sm font-medium shadow-lg transform translate-y-4 opacity-0 transition-all duration-300';
 
-    const colors: Record<string, string> = {
-      success: 'background-color: var(--color-text); color: var(--color-bg);',
-      error: 'background-color: #DC2626; color: white;',
-      info: 'background-color: var(--color-accent); color: white;',
-    };
-    toast.style.cssText = colors[type] || colors.success;
+    // Base styles applied directly so we don't depend on Tailwind classes for critical layout
+    toast.style.cssText = [
+      'pointer-events: auto',
+      'padding: 0.75rem 1.25rem',
+      'border-radius: var(--radius-lg, 0.75rem)',
+      'font-size: var(--text-sm, 0.875rem)',
+      'font-weight: 500',
+      'box-shadow: 0 4px 12px rgba(0,0,0,0.15)',
+      'transform: translateY(1rem)',
+      'opacity: 0',
+      'transition: transform 300ms var(--ease-out, ease), opacity 300ms var(--ease-out, ease)',
+      getToastStyles(type),
+    ].join('; ');
+
     toast.textContent = message;
     toast.setAttribute('role', 'status');
 
@@ -38,14 +92,14 @@
 
     // Animate in
     requestAnimationFrame(() => {
-      toast.classList.remove('translate-y-4', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
+      toast.style.transform = 'translateY(0)';
+      toast.style.opacity = '1';
     });
 
     // Animate out & remove
     setTimeout(() => {
-      toast.classList.remove('translate-y-0', 'opacity-100');
-      toast.classList.add('translate-y-4', 'opacity-0');
+      toast.style.transform = 'translateY(1rem)';
+      toast.style.opacity = '0';
       setTimeout(() => toast.remove(), 300);
     }, duration);
   }) as EventListener);

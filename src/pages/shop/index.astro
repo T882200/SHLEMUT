@@ -16,7 +16,7 @@ const allTags = [...new Set(allProducts.flatMap((p) => p.data.tags))].sort();
     <div class="container-wide">
       <!-- Page header -->
       <div class="mb-12 fade-in-up">
-        <h1 class="text-4xl md:text-5xl font-bold" style="color: var(--color-text);">Shop</h1>
+        <h1 class="text-4xl md:text-5xl font-bold gradient-text">Shop</h1>
         <p class="mt-3 text-lg" style="color: var(--color-text-muted);">
           Browse our collection of premium digital assets.
         </p>
@@ -148,9 +148,13 @@ const allTags = [...new Set(allProducts.flatMap((p) => p.data.tags))].sort();
     font-weight: 600;
   }
   .tag-filter.active {
-    background-color: var(--color-accent) !important;
+    background: linear-gradient(135deg, var(--color-pink), var(--color-purple)) !important;
     color: white !important;
-    border-color: var(--color-accent) !important;
+    border-color: transparent !important;
+  }
+  :global(.dark) .tag-filter.active {
+    background: linear-gradient(135deg, #F59E0B, #D97706) !important;
+    color: #0A0A0A !important;
   }
 </style>
 
