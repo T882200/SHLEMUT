@@ -1,7 +1,9 @@
 backend:
   name: github
   repo: T882200/SHLEMUT
-  branch: main
+  branch: claude/digital-assets-store-1b3yK
+  auth_type: pkce
+  app_id: ""  # ← Paste your GitHub OAuth App Client ID here
 
 media_folder: public/assets/images
 public_folder: /SHLEMUT/assets/images
